@@ -1,0 +1,4 @@
+interface:
+  display_name: "原型打包发布"
+  short_description: "Package frontend prototype source and dist ZIPs"
+  default_prompt: "Use $prototype-package to package this frontend prototype into source_code.zip and dist.zip."
