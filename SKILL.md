@@ -43,13 +43,14 @@ python3 ~/.codex/skills/prototype-package/scripts/package_prototype.py /path/to/
    - 选择包管理器：`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`bun.lockb`、`bun.lock`，否则默认 `npm`。
    - 在 `node_modules` 不存在时自动安装依赖。
    - 在存在构建脚本时运行构建命令；纯静态项目则跳过构建。
-   - 打包源码并排除 `node_modules`、构建目录、缓存、日志、历史 zip 和版本控制目录。
+   - 打包源码并递归排除 `node_modules`、构建目录、缓存、日志、历史 zip 和版本控制目录；排除规则对项目根目录及所有层级子目录同时生效。
    - 自动识别 `dist`、`build`、`out`、`.output/public`、Angular/Nuxt 常见嵌套输出，或按 `--dist-dir` 打包到 `dist.zip` 的根层级。
 4. 验证输出。确认两个 zip 都存在且非空；确认 `dist.zip` 内含 `index.html`。如果没有 `index.html`，说明它可能不是可直接部署的静态站点，必须向用户说明风险。
 
 ## 产物约定
 
 - `source_code.zip` 包含项目源码文件，路径从项目根开始，不包含外层项目目录。
+- `source_code.zip` 在任意目录层级都必须排除 `.next`、`node_modules`、`out`、`dist`、`build`、缓存目录和历史 zip；只要路径中的任一目录段命中排除规则，就不要遍历或写入该目录。
 - `dist.zip` 包含构建目录内部文件，路径从静态站点根开始；上传系统解压后应能直接看到 `index.html`。
 - 默认自动识别构建目录，优先使用含 `index.html` 的 `dist`、`build`、`out`、`.output/public` 等目录。如项目使用其他输出目录，运行脚本时传 `--dist-dir build` 或对应目录名。
 - 默认输出目录是项目根。用户要求集中收集产物时，用 `--output-dir` 指定。
