@@ -3,7 +3,7 @@ name: prototype-package
 description: Package frontend product prototype projects for handoff and upload. Use when a product manager or Codex needs to turn a local frontend prototype built with Vue, React, Svelte, Angular, Vite, Vue CLI, Next.js static export, Nuxt static generation, or plain HTML/CSS/JavaScript into source_code.zip and dist.zip for cloud prototype deployment, project management upload,研发 review, or sharing outside the local machine. The skill identifies the frontend project, installs dependencies when needed, runs the build command when present, verifies static output, and produces standardized ZIP archives.
 ---
 
-# Prototype Package
+# 原型打包工具
 
 ## 目标
 
@@ -39,19 +39,20 @@ python3 ~/.codex/skills/prototype-package/scripts/package_prototype.py /path/to/
 
 1. 定位原型项目根目录。优先使用用户给出的路径；否则从当前目录向下找最近的 `package.json` 或 `index.html`。如果工作区里有多个前端项目，先根据用户提到的项目名、最近修改时间或目录内容判断；不确定时只问一个问题。
 2. 检查项目类型。Node 前端项目优先使用 `package.json` 里的 `scripts.build`；纯静态原型可直接使用已有 `index.html` 生成部署包。不要随意改业务代码来凑构建。
-3. 运行脚本生成产物。脚本会：
+3. 运行脚本生成产物。打包前按下方静态资源规则准备部署目录；需要时用 `--dist-dir` 指向临时精简目录。脚本会：
    - 选择包管理器：`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`bun.lockb`、`bun.lock`，否则默认 `npm`。
    - 在 `node_modules` 不存在时自动安装依赖。
    - 在存在构建脚本时运行构建命令；纯静态项目则跳过构建。
    - 打包源码并递归排除 `node_modules`、构建目录、缓存、日志、历史 zip 和版本控制目录；排除规则对项目根目录及所有层级子目录同时生效。
    - 自动识别 `dist`、`build`、`out`、`.output/public`、Angular/Nuxt 常见嵌套输出，或按 `--dist-dir` 打包到 `dist.zip` 的根层级。
-4. 验证输出。确认两个 zip 都存在且非空；确认 `dist.zip` 内含 `index.html`。如果没有 `index.html`，说明它可能不是可直接部署的静态站点，必须向用户说明风险。
+4. 验证输出。确认两个 zip 都存在且非空；确认 `dist.zip` 内含 `index.html`。检查归档清单和体积，确认已排除无用静态文件，并验证页面及资源能正常加载。如果没有 `index.html`，说明它可能不是可直接部署的静态站点，必须向用户说明风险。
 
 ## 产物约定
 
 - `source_code.zip` 包含项目源码文件，路径从项目根开始，不包含外层项目目录。
 - `source_code.zip` 在任意目录层级都必须排除 `.next`、`node_modules`、`out`、`dist`、`build`、缓存目录和历史 zip；只要路径中的任一目录段命中排除规则，就不要遍历或写入该目录。
 - `dist.zip` 包含构建目录内部文件，路径从静态站点根开始；上传系统解压后应能直接看到 `index.html`。
+- 不要把无关文件打包到 `dist.zip`，从而导致 `dist.zip` 文件过大。仅保留原型运行所需的静态文件；打包前检查 `public`、`assets` 及构建产物，排除确认无关的文档、日志、缓存、历史压缩包、截图、设计源文件，以及未使用的图片、视频、字体等。判断用途时检查 HTML/CSS/JS 引用及动态、懒加载路径；无法确认用途的文件保留。通过构建配置或临时部署目录排除无用资源，保留项目源文件。
 - 默认自动识别构建目录，优先使用含 `index.html` 的 `dist`、`build`、`out`、`.output/public` 等目录。如项目使用其他输出目录，运行脚本时传 `--dist-dir build` 或对应目录名。
 - 默认输出目录是项目根。用户要求集中收集产物时，用 `--output-dir` 指定。
 
